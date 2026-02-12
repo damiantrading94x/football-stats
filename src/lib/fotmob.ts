@@ -741,7 +741,6 @@ export async function getPlayerMatchLog(playerId: number): Promise<PlayerProfile
     seasonMinutes: getStat("minutes_played"),
     seasonRating: mainStats.find((s) => s.localizedTitleId === "rating")?.value?.toString() || null,
     matches: data.recentMatches
-      .filter((m) => m.goals > 0 || m.assists > 0)
       .map((m) => ({
         matchId: String(m.id),
         date: m.matchDate.utcTime,

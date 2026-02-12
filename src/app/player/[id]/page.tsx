@@ -147,7 +147,7 @@ export default function PlayerPage({
   const [player, setPlayer] = useState<PlayerProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"all" | "goals" | "assists">("all");
+  const [filter, setFilter] = useState<"all" | "involved" | "goals" | "assists">("all");
 
   useEffect(() => {
     setLoading(true);
@@ -191,6 +191,7 @@ export default function PlayerPage({
   const filteredMatches = player.matches.filter((m) => {
     if (filter === "goals") return m.goals > 0;
     if (filter === "assists") return m.assists > 0;
+    if (filter === "involved") return m.goals > 0 || m.assists > 0;
     return true;
   });
 
@@ -324,7 +325,7 @@ export default function PlayerPage({
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
           <div>
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-              Goal Involvements
+              Match Log
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {totalGoals} goals & {totalAssists} assists across {player.matches.length} matches
@@ -333,7 +334,7 @@ export default function PlayerPage({
 
           {/* Filter tabs */}
           <div className="flex gap-1 bg-gray-100 dark:bg-white/5 rounded-lg p-1">
-            {(["all", "goals", "assists"] as const).map((f) => (
+            {(["all", "involved", "goals", "assists"] as const).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
@@ -343,7 +344,7 @@ export default function PlayerPage({
                     : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 }`}
               >
-                {f === "all" ? `All (${player.matches.length})` : f === "goals" ? `Goals (${player.matches.filter((m) => m.goals > 0).length})` : `Assists (${player.matches.filter((m) => m.assists > 0).length})`}
+                {f === "all" ? `All (${player.matches.length})` : f === "involved" ? `G/A (${player.matches.filter((m) => m.goals > 0 || m.assists > 0).length})` : f === "goals" ? `Goals (${player.matches.filter((m) => m.goals > 0).length})` : `Assists (${player.matches.filter((m) => m.assists > 0).length})`}
               </button>
             ))}
           </div>
