@@ -1,0 +1,55 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getTopScorers, getTopAssists, getStandings } from "@/lib/api";
+import { LEAGUES } from "@/lib/types";
+
+export const revalidate = 300; // 5 minutes ISR
+
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const leagueId = searchParams.get("league");
+
+  if (!leagueId) {
+    return NextResponse.json({ error: "League ID required" }, { status: 400 });
+  }
+
+  const id = parseInt(leagueId);
+  const league = LEAGUES.find((l) => l.id === id);
+
+  if (!league) {
+    return NextResponse.json({ error: "Invalid league ID" }, { status: 400 });
+  }
+
+  try {
+    const [topScorers, topAssists, standings] = await Promise.all([
+      getTopScorers(id),
+      getTopAssists(id),
+      getStandings(id),
+    ]);
+
+    return NextResponse.json(
+      {
+        league: {
+          id: league.id,
+          name: league.name,
+          country: league.country,
+          flag: league.flag,
+        },
+        topScorers,
+        topAssists,
+        standings,
+        lastUpdated: new Date().toISOString(),
+      },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60",
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Error fetching league stats:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch data" },
+      { status: 500 }
+    );
+  }
+}
