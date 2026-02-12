@@ -2,6 +2,7 @@
 
 import { TopScorer } from "@/lib/types";
 import Image from "next/image";
+import Link from "next/link";
 import { Target, HandHelping, AlertTriangle, Clock, Star, Timer, Zap } from "lucide-react";
 
 interface StatsTableProps {
@@ -93,7 +94,7 @@ export function StatsTable({ players, type }: StatsTableProps) {
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-2 mt-0.5">
+              <Link href={`/team/${p.team.id}`} className="flex items-center gap-2 mt-0.5 group/team">
                 <div className="relative w-4 h-4 rounded-sm overflow-hidden flex-shrink-0">
                   <Image
                     src={p.team.logo}
@@ -103,10 +104,10 @@ export function StatsTable({ players, type }: StatsTableProps) {
                     sizes="16px"
                   />
                 </div>
-                <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                <span className="text-xs text-gray-500 dark:text-gray-400 truncate group-hover/team:text-blue-500 dark:group-hover/team:text-blue-400 transition-colors">
                   {p.team.name}
                 </span>
-              </div>
+              </Link>
             </div>
 
             {/* Stats */}

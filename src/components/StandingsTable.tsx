@@ -2,6 +2,7 @@
 
 import { Standing } from "@/lib/types";
 import Image from "next/image";
+import Link from "next/link";
 
 interface StandingsTableProps {
   standings: Standing[];
@@ -75,7 +76,10 @@ export function StandingsTable({ standings }: StandingsTableProps) {
                   </div>
                 </td>
                 <td className="py-2.5 px-2">
-                  <div className="flex items-center gap-2">
+                  <Link
+                    href={`/team/${team.team.id}`}
+                    className="flex items-center gap-2 group/team"
+                  >
                     <div className="relative w-5 h-5 flex-shrink-0">
                       <Image
                         src={team.team.logo}
@@ -85,10 +89,10 @@ export function StandingsTable({ standings }: StandingsTableProps) {
                         sizes="20px"
                       />
                     </div>
-                    <span className="font-medium text-gray-900 dark:text-white truncate max-w-[120px] sm:max-w-none">
+                    <span className="font-medium text-gray-900 dark:text-white truncate max-w-[120px] sm:max-w-none group-hover/team:text-blue-500 dark:group-hover/team:text-blue-400 transition-colors">
                       {team.team.name}
                     </span>
-                  </div>
+                  </Link>
                 </td>
                 <td className="text-center py-2.5 px-2 text-gray-500 dark:text-gray-400 tabular-nums">
                   {team.played}

@@ -439,3 +439,181 @@ export async function getUpcomingFixtures(
     score: m.status.scoreStr,
   }));
 }
+
+// ──────────────────────────────────────────────
+// Team stats
+// ──────────────────────────────────────────────
+
+interface FotMobTeamStatPlayer {
+  ParticipantName: string;
+  ParticiantId: number;
+  TeamId: number;
+  TeamName: string;
+  StatValue: number;
+  SubStatValue: number;
+  MinutesPlayed: number;
+  MatchesPlayed: number;
+  Rank: number;
+  ParticipantCountryCode: string;
+  Positions: number[];
+}
+
+interface FotMobTeamStatsJson {
+  TopLists: Array<{
+    StatName: string;
+    Title: string;
+    Subtitle: string;
+    StatList: FotMobTeamStatPlayer[];
+  }>;
+}
+
+export interface TeamOverview {
+  id: number;
+  name: string;
+  logo: string;
+  country: string;
+  leagueId: number;
+  leagueName: string;
+  seasonId: number;
+}
+
+export interface TeamPlayerStat {
+  id: number;
+  name: string;
+  photo: string;
+  value: number;
+  subValue: number;
+  appearances: number;
+  minutes: number;
+  rank: number;
+  country: string;
+}
+
+export async function getTeamStats(teamId: number): Promise<{
+  overview: TeamOverview;
+  scorers: TeamPlayerStat[];
+  assisters: TeamPlayerStat[];
+  form: Array<{ result: string; opponent: string; score: string; date: string }>;
+  nextMatch: { home: string; away: string; date: string; tournament: string } | null;
+}> {
+  // Fetch team overview from FotMob
+  interface FotMobTeamResponse {
+    details: { id: number; name: string; country: string; shortName: string };
+    stats: {
+      primaryLeagueId: number;
+      primarySeasonId: number;
+      players: Array<{
+        fetchAllUrl: string;
+        localizedTitleId: string;
+        header: string;
+        topThree: Array<{ id: number; name: string; value: number }>;
+      }>;
+    };
+    overview: {
+      season: string;
+      teamForm: Array<{
+        result: number;
+        resultString: string;
+        score: string;
+        tooltipText: {
+          utcTime: string;
+          homeTeam: string;
+          awayTeam: string;
+          homeScore: number;
+          awayScore: number;
+        };
+      }>;
+      nextMatch?: {
+        home: { name: string };
+        away: { name: string };
+        status: { utcTime: string };
+        tournament: { name: string };
+      };
+    };
+  }
+
+  const data = await fotmobFetch<FotMobTeamResponse>(
+    `${FOTMOB_BASE}/teams?id=${teamId}`
+  );
+
+  const overview: TeamOverview = {
+    id: data.details.id,
+    name: data.details.name,
+    logo: teamLogoUrl(data.details.id),
+    country: data.details.country,
+    leagueId: data.stats.primaryLeagueId,
+    leagueName: "",
+    seasonId: data.stats.primarySeasonId,
+  };
+
+  // Find the goals and assists fetchAllUrl
+  const goalsStat = data.stats.players?.find(
+    (s) => s.localizedTitleId === "goals_title"
+  );
+  const assistsStat = data.stats.players?.find(
+    (s) => s.localizedTitleId === "goal_assist_title"
+  );
+
+  // Fetch full stats JSON in parallel
+  const [scorersData, assistsData] = await Promise.all([
+    goalsStat?.fetchAllUrl
+      ? fotmobFetch<FotMobTeamStatsJson>(goalsStat.fetchAllUrl)
+      : Promise.resolve(null),
+    assistsStat?.fetchAllUrl
+      ? fotmobFetch<FotMobTeamStatsJson>(assistsStat.fetchAllUrl)
+      : Promise.resolve(null),
+  ]);
+
+  // Filter to this team's players
+  const teamScorers = (scorersData?.TopLists?.[0]?.StatList || [])
+    .filter((p) => p.TeamId === teamId)
+    .map((p) => ({
+      id: p.ParticiantId,
+      name: p.ParticipantName,
+      photo: playerPhotoUrl(p.ParticiantId),
+      value: p.StatValue,
+      subValue: p.SubStatValue,
+      appearances: p.MatchesPlayed,
+      minutes: p.MinutesPlayed,
+      rank: p.Rank,
+      country: p.ParticipantCountryCode,
+    }));
+
+  const teamAssisters = (assistsData?.TopLists?.[0]?.StatList || [])
+    .filter((p) => p.TeamId === teamId)
+    .map((p) => ({
+      id: p.ParticiantId,
+      name: p.ParticipantName,
+      photo: playerPhotoUrl(p.ParticiantId),
+      value: p.StatValue,
+      subValue: p.SubStatValue,
+      appearances: p.MatchesPlayed,
+      minutes: p.MinutesPlayed,
+      rank: p.Rank,
+      country: p.ParticipantCountryCode,
+    }));
+
+  // Form
+  const form = (data.overview?.teamForm || []).slice(0, 10).map((f) => ({
+    result: f.resultString,
+    opponent:
+      f.tooltipText.homeTeam === data.details.name
+        ? f.tooltipText.awayTeam
+        : f.tooltipText.homeTeam,
+    score: f.score,
+    date: f.tooltipText.utcTime,
+  }));
+
+  // Next match
+  const nm = data.overview?.nextMatch;
+  const nextMatch = nm
+    ? {
+        home: nm.home.name,
+        away: nm.away.name,
+        date: nm.status.utcTime,
+        tournament: nm.tournament.name,
+      }
+    : null;
+
+  return { overview, scorers: teamScorers, assisters: teamAssisters, form, nextMatch };
+}
