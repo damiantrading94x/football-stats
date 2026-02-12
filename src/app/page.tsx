@@ -1,5 +1,5 @@
 import { LEAGUES } from "@/lib/types";
-import { LeagueCard } from "@/components/LeagueCard";
+import { SortableLeagueGrid } from "@/components/SortableLeagueGrid";
 import { Trophy, TrendingUp, Target, Users } from "lucide-react";
 
 export default function Home() {
@@ -43,21 +43,7 @@ export default function Home() {
 
       {/* League Grid */}
       <div className="mb-6">
-        <h2 className="text-sm uppercase tracking-widest text-gray-400 dark:text-gray-500 font-semibold mb-4 px-1">
-          Select a League
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {LEAGUES.map((league, index) => (
-            <LeagueCard
-              key={league.id}
-              id={league.id}
-              name={league.name}
-              country={league.country}
-              flag={league.flag}
-              index={index}
-            />
-          ))}
-        </div>
+        <SortableLeagueGrid leagues={LEAGUES.map(l => ({ id: l.id, name: l.name, country: l.country, flag: l.flag }))} />
       </div>
 
     </div>
