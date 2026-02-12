@@ -111,6 +111,8 @@ export const LEAGUES = [
   { id: 64, name: "Premiership", country: "Scotland", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
   // Middle East
   { id: 536, name: "Saudi Pro League", country: "Saudi Arabia", flag: "🇸🇦" },
+  // North America
+  { id: 130, name: "MLS", country: "USA", flag: "🇺🇸" },
   // South America
   { id: 268, name: "Serie A", country: "Brazil", flag: "🇧🇷" },
   { id: 112, name: "Liga Profesional", country: "Argentina", flag: "🇦🇷" },
