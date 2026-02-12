@@ -84,9 +84,11 @@ export function StatsTable({ players, type }: StatsTableProps) {
             {/* Player Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <h4 className="font-semibold text-gray-900 dark:text-white text-sm truncate">
-                  {p.player.name}
-                </h4>
+                <Link href={`/player/${p.player.id}`} className="hover:text-blue-500 dark:hover:text-blue-400 transition-colors">
+                  <h4 className="font-semibold text-gray-900 dark:text-white text-sm truncate">
+                    {p.player.name}
+                  </h4>
+                </Link>
                 {p.rating && (
                   <div className="hidden sm:flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400">
                     <Star className="w-2.5 h-2.5" />

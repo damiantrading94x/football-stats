@@ -617,3 +617,157 @@ export async function getTeamStats(teamId: number): Promise<{
 
   return { overview, scorers: teamScorers, assisters: teamAssisters, form, nextMatch };
 }
+
+// ──────────────────────────────────────────────
+// Player match log (goals & assists per game)
+// ──────────────────────────────────────────────
+
+export interface PlayerMatchEntry {
+  matchId: string;
+  date: string;
+  leagueId: number;
+  leagueName: string;
+  stage: string | null;
+  teamName: string;
+  teamId: number;
+  opponentName: string;
+  opponentId: number;
+  isHome: boolean;
+  homeScore: number;
+  awayScore: number;
+  goals: number;
+  assists: number;
+  minutesPlayed: number;
+  rating: string | null;
+  isTopRating: boolean;
+  playerOfTheMatch: boolean;
+  yellowCards: number;
+  redCards: number;
+  onBench: boolean;
+}
+
+export interface PlayerProfile {
+  id: number;
+  name: string;
+  photo: string;
+  teamId: number;
+  teamName: string;
+  teamLogo: string;
+  position: string;
+  country: string;
+  countryCode: string;
+  age: number;
+  height: string;
+  shirtNumber: number | null;
+  seasonGoals: number;
+  seasonAssists: number;
+  seasonAppearances: number;
+  seasonMinutes: number;
+  seasonRating: string | null;
+  matches: PlayerMatchEntry[];
+}
+
+export async function getPlayerMatchLog(playerId: number): Promise<PlayerProfile> {
+  interface FotMobPlayerFull {
+    id: number;
+    name: string;
+    primaryTeam: { teamId: number; teamName: string };
+    positionDescription?: { primaryPosition?: { label: string } };
+    playerInformation?: Array<{
+      translationKey: string;
+      value: { numberValue?: number; key?: string; fallback?: string | number };
+    }>;
+    mainLeague?: {
+      leagueId: number;
+      leagueName: string;
+      stats: Array<{ localizedTitleId: string; value: number }>;
+    };
+    recentMatches: Array<{
+      teamId: number;
+      teamName: string;
+      opponentTeamId: number;
+      opponentTeamName: string;
+      isHomeTeam: boolean;
+      id: number;
+      matchDate: { utcTime: string };
+      leagueId: number;
+      leagueName: string;
+      stage: string | null;
+      homeScore: number;
+      awayScore: number;
+      minutesPlayed: number;
+      goals: number;
+      assists: number;
+      yellowCards: number;
+      redCards: number;
+      ratingProps: { rating: string | number; isTopRating: boolean };
+      playerOfTheMatch: boolean;
+      onBench: boolean;
+    }>;
+  }
+
+  const data = await fotmobFetch<FotMobPlayerFull>(
+    `${FOTMOB_BASE}/playerData?id=${playerId}`
+  );
+
+  // Extract player info
+  const info = data.playerInformation || [];
+  const getInfo = (key: string) => info.find((i) => i.translationKey === key);
+  const ageInfo = getInfo("age_sentencecase");
+  const heightInfo = getInfo("height_sentencecase");
+  const shirtInfo = getInfo("shirt");
+  const countryInfo = getInfo("country_sentencecase");
+
+  // Main league stats
+  const mainStats = data.mainLeague?.stats || [];
+  const getStat = (id: string) => mainStats.find((s) => s.localizedTitleId === id)?.value || 0;
+
+  const profile: PlayerProfile = {
+    id: data.id,
+    name: data.name,
+    photo: playerPhotoUrl(data.id),
+    teamId: data.primaryTeam.teamId,
+    teamName: data.primaryTeam.teamName,
+    teamLogo: teamLogoUrl(data.primaryTeam.teamId),
+    position: data.positionDescription?.primaryPosition?.label || "Unknown",
+    country: countryInfo?.value?.fallback?.toString() || "",
+    countryCode: (countryInfo as { icon?: { id: string } })?.icon?.id || "",
+    age: ageInfo?.value?.numberValue || 0,
+    height: heightInfo?.value?.fallback?.toString() || "",
+    shirtNumber: shirtInfo?.value?.numberValue || null,
+    seasonGoals: getStat("goals"),
+    seasonAssists: getStat("assists"),
+    seasonAppearances: getStat("matches_uppercase"),
+    seasonMinutes: getStat("minutes_played"),
+    seasonRating: mainStats.find((s) => s.localizedTitleId === "rating")?.value?.toString() || null,
+    matches: data.recentMatches
+      .filter((m) => m.goals > 0 || m.assists > 0)
+      .map((m) => ({
+        matchId: String(m.id),
+        date: m.matchDate.utcTime,
+        leagueId: m.leagueId,
+        leagueName: m.leagueName,
+        stage: m.stage,
+        teamName: m.teamName,
+        teamId: m.teamId,
+        opponentName: m.opponentTeamName,
+        opponentId: m.opponentTeamId,
+        isHome: m.isHomeTeam,
+        homeScore: m.homeScore,
+        awayScore: m.awayScore,
+        goals: m.goals,
+        assists: m.assists,
+        minutesPlayed: m.minutesPlayed,
+        rating: typeof m.ratingProps.rating === "number"
+          ? m.ratingProps.rating === 0 ? null : String(m.ratingProps.rating)
+          : m.ratingProps.rating || null,
+        isTopRating: m.ratingProps.isTopRating,
+        playerOfTheMatch: m.playerOfTheMatch,
+        yellowCards: m.yellowCards,
+        redCards: m.redCards,
+        onBench: m.onBench,
+      })),
+  };
+
+  return profile;
+}

@@ -97,9 +97,11 @@ function PlayerRow({
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <h4 className="font-semibold text-gray-900 dark:text-white text-sm truncate">
-          {player.name}
-        </h4>
+        <Link href={`/player/${player.id}`} className="hover:text-blue-500 dark:hover:text-blue-400 transition-colors">
+          <h4 className="font-semibold text-gray-900 dark:text-white text-sm truncate">
+            {player.name}
+          </h4>
+        </Link>
         <div className="flex items-center gap-2 mt-0.5">
           <span className="text-xs text-gray-500 dark:text-gray-400">
             League rank: #{player.rank}

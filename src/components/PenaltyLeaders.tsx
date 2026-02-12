@@ -2,6 +2,7 @@
 
 import { TopScorer } from "@/lib/types";
 import Image from "next/image";
+import Link from "next/link";
 import { Target, HandHelping, AlertTriangle } from "lucide-react";
 
 interface PenaltyLeadersProps {
@@ -48,9 +49,11 @@ export function PenaltyLeaders({ players }: PenaltyLeadersProps) {
 
           {/* Player Info */}
           <div className="flex-1 min-w-0">
-            <h4 className="font-semibold text-gray-900 dark:text-white text-sm truncate">
-              {p.player.name}
-            </h4>
+            <Link href={`/player/${p.player.id}`} className="hover:text-blue-500 dark:hover:text-blue-400 transition-colors">
+              <h4 className="font-semibold text-gray-900 dark:text-white text-sm truncate">
+                {p.player.name}
+              </h4>
+            </Link>
             <div className="flex items-center gap-2 mt-0.5">
               <div className="relative w-4 h-4 rounded-sm overflow-hidden flex-shrink-0">
                 <Image
