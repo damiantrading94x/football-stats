@@ -10,67 +10,67 @@ export interface BroadcastInfo {
 export const BROADCAST_MAP: Record<number, BroadcastInfo> = {
   // European Cups
   42:  { // Champions League
-    poland: ["Canal+ Extra 1", "Canal+ Extra 2", "Canal+ Sport 3", "Canal+ Sport 4"],
-    uk: ["TNT Sports 1", "TNT Sports 2", "discovery+"],
-    usa: ["CBS Sports Network", "Paramount+", "UniMás", "TUDN"],
+    poland: ["Canal+ Premium"],
+    uk: ["TNT Sports"],
+    usa: ["Paramount+"],
   },
   73:  { // Europa League
-    poland: ["Polsat Sport 1", "Polsat Sport 2", "Polsat Sport 3", "Polsat Box Go"],
-    uk: ["TNT Sports 1", "TNT Sports 2", "discovery+"],
-    usa: ["CBS Sports Network", "Paramount+", "UniMás"],
+    poland: ["Polsat Sport Premium"],
+    uk: ["TNT Sports"],
+    usa: ["Paramount+"],
   },
   10216: { // Conference League
-    poland: ["Polsat Sport 1", "Polsat Sport 2", "Polsat Box Go"],
-    uk: ["TNT Sports 1", "TNT Sports 2", "discovery+"],
-    usa: ["CBS Sports Golazo", "Paramount+"],
+    poland: ["Polsat Sport Premium"],
+    uk: ["TNT Sports"],
+    usa: ["Paramount+"],
   },
 
   // England
   47:  { // Premier League
-    poland: ["Canal+ Sport", "Canal+ Sport 2", "Canal+ Extra 1", "Canal+ Extra 2", "Canal+ Extra 3", "Viaplay"],
-    uk: ["Sky Sports Main Event", "Sky Sports Premier League", "Sky Sports Ultra", "TNT Sports 1", "TNT Sports 2", "Amazon Prime Video"],
-    usa: ["NBC", "USA Network", "Peacock", "Telemundo", "Universo"],
+    poland: ["Canal+"],
+    uk: ["Sky Sports", "TNT Sports"],
+    usa: ["Peacock", "NBC"],
   },
   132: { // FA Cup
     poland: ["Viaplay"],
-    uk: ["ITV1", "ITV4", "ITVX", "BBC One", "BBC iPlayer"],
-    usa: ["ESPN", "ESPN2", "ESPN+"],
+    uk: ["ITV", "BBC"],
+    usa: ["ESPN+"],
   },
   133: { // EFL Cup
     poland: ["Viaplay"],
-    uk: ["Sky Sports Main Event", "Sky Sports Football", "Sky Sports+"],
+    uk: ["Sky Sports"],
     usa: ["Paramount+"],
   },
 
   // Spain
   87:  { // LaLiga
-    poland: ["Eleven Sports 1", "Eleven Sports 2", "Eleven Sports 3", "Eleven Sports 4"],
-    uk: ["Premier Sports 1", "Premier Sports 2", "LaLigaTV"],
-    usa: ["ESPN", "ESPN2", "ESPN+", "ESPN Deportes"],
+    poland: ["Eleven Sports"],
+    uk: ["Premier Sports", "LaLigaTV"],
+    usa: ["ESPN+"],
   },
   138: { // Copa del Rey
-    poland: ["Eleven Sports 1", "Eleven Sports 2"],
-    uk: ["Premier Sports 1"],
-    usa: ["ESPN+", "ESPN Deportes"],
+    poland: ["Eleven Sports"],
+    uk: ["ITV", "Premier Sports"],
+    usa: ["ESPN+"],
   },
 
   // Italy
   55:  { // Serie A
-    poland: ["Eleven Sports 1", "Eleven Sports 2", "Eleven Sports 3", "Eleven Sports 4"],
-    uk: ["TNT Sports 1", "TNT Sports 2", "discovery+"],
-    usa: ["CBS Sports Network", "CBS Sports Golazo", "Paramount+"],
+    poland: ["Eleven Sports"],
+    uk: ["TNT Sports"],
+    usa: ["Paramount+"],
   },
   141: { // Coppa Italia
-    poland: ["Eleven Sports 1", "Eleven Sports 2"],
+    poland: ["Eleven Sports"],
     uk: [],
-    usa: ["CBS Sports Network", "Paramount+"],
+    usa: ["Paramount+"],
   },
 
   // Germany
   54:  { // Bundesliga
     poland: ["Viaplay"],
-    uk: ["Sky Sports Main Event", "Sky Sports Football", "Sky Sports+"],
-    usa: ["ESPN", "ESPN2", "ESPN+"],
+    uk: ["Sky Sports"],
+    usa: ["ESPN+"],
   },
   209: { // DFB Pokal
     poland: ["Viaplay"],
@@ -80,14 +80,14 @@ export const BROADCAST_MAP: Record<number, BroadcastInfo> = {
 
   // France
   53:  { // Ligue 1
-    poland: ["Eleven Sports 1", "Eleven Sports 2"],
-    uk: ["beIN Sports 1", "beIN Sports 2"],
-    usa: ["beIN Sports", "beIN Sports en Español", "beIN Sports XTRA"],
+    poland: ["Eleven Sports"],
+    uk: ["beIN Sports"],
+    usa: ["beIN Sports"],
   },
 
   // Other European
   61:  { // Liga Portugal
-    poland: ["Eleven Sports 1", "Eleven Sports 2"],
+    poland: ["Eleven Sports"],
     uk: [],
     usa: ["GolTV"],
   },
@@ -98,18 +98,18 @@ export const BROADCAST_MAP: Record<number, BroadcastInfo> = {
   },
   71:  { // Süper Lig
     poland: [],
-    uk: ["beIN Sports 1", "beIN Sports 2"],
-    usa: ["beIN Sports", "beIN Sports XTRA"],
+    uk: ["beIN Sports"],
+    usa: ["beIN Sports"],
   },
   40:  { // Belgium First Div A
     poland: [],
-    uk: [],
+    uk: ["DAZN"],
     usa: [],
   },
   64:  { // Scottish Premiership
     poland: ["Viaplay"],
-    uk: ["Sky Sports Main Event", "Sky Sports Football", "Sky Sports+"],
-    usa: ["CBS Sports Golazo", "Paramount+"],
+    uk: ["Sky Sports"],
+    usa: ["Paramount+"],
   },
 
   // Middle East
@@ -121,31 +121,31 @@ export const BROADCAST_MAP: Record<number, BroadcastInfo> = {
 
   // North America
   130: { // MLS
-    poland: ["Apple TV (MLS Season Pass)"],
-    uk: ["Apple TV (MLS Season Pass)", "Sky Sports Main Event"],
-    usa: ["Apple TV (MLS Season Pass)", "FOX", "FS1", "FS2"],
+    poland: ["Apple TV"],
+    uk: ["Apple TV"],
+    usa: ["Apple TV (MLS Season Pass)"],
   },
 
   // South America
   268: { // Brazil Serie A
     poland: [],
-    uk: [],
-    usa: ["Paramount+", "beIN Sports XTRA"],
+    uk: ["Premier Sports"],
+    usa: ["Paramount+"],
   },
   112: { // Liga Profesional Argentina
     poland: [],
     uk: [],
-    usa: ["Paramount+", "TyC Sports Internacional"],
+    usa: ["Paramount+"],
   },
 
   // Poland
   196: { // Ekstraklasa
-    poland: ["Canal+ Sport", "Canal+ Sport 2", "Canal+ Sport 3", "Canal+ Extra 1"],
+    poland: ["Canal+"],
     uk: [],
     usa: [],
   },
   197: { // 1. Liga
-    poland: ["Polsat Sport 1", "Polsat Sport 2", "Polsat Sport Extra", "Polsat Box Go"],
+    poland: ["Polsat Sport"],
     uk: [],
     usa: [],
   },
