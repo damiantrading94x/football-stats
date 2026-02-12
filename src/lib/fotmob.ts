@@ -123,6 +123,22 @@ async function getLeagueSeasonId(leagueId: number): Promise<number> {
   const data = await fotmobFetch<FotMobLeagueResponse>(
     `${FOTMOB_BASE}/leagues?id=${leagueId}`
   );
+  
+  // Try each season until we find one with data (for leagues with upcoming seasons)
+  for (const season of data.stats.seasonStatLinks.slice(0, 3)) {
+    try {
+      const testData = await fotmobFetch<FotMobDeepStatsResponse>(
+        `${FOTMOB_BASE}/leagueseasondeepstats?id=${leagueId}&season=${season.TournamentId}&type=players&stat=goals`
+      );
+      if (testData.statsData && testData.statsData.length > 0) {
+        return season.TournamentId;
+      }
+    } catch {
+      continue;
+    }
+  }
+  
+  // Fallback to first season if none have data
   return data.stats.seasonStatLinks[0].TournamentId;
 }
 
