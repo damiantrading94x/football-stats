@@ -90,16 +90,16 @@ export interface LeagueData {
 }
 
 export const LEAGUES = [
-  { id: 39, name: "Premier League", country: "England", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
-  { id: 140, name: "La Liga", country: "Spain", flag: "🇪🇸" },
-  { id: 135, name: "Serie A", country: "Italy", flag: "🇮🇹" },
-  { id: 78, name: "Bundesliga", country: "Germany", flag: "🇩🇪" },
-  { id: 61, name: "Ligue 1", country: "France", flag: "🇫🇷" },
-  { id: 94, name: "Primeira Liga", country: "Portugal", flag: "🇵🇹" },
-  { id: 88, name: "Eredivisie", country: "Netherlands", flag: "🇳🇱" },
-  { id: 203, name: "Süper Lig", country: "Turkey", flag: "🇹🇷" },
-  { id: 144, name: "Pro League", country: "Belgium", flag: "🇧🇪" },
-  { id: 179, name: "Premiership", country: "Scotland", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
+  { id: 47, name: "Premier League", country: "England", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
+  { id: 87, name: "LaLiga", country: "Spain", flag: "🇪🇸" },
+  { id: 55, name: "Serie A", country: "Italy", flag: "🇮🇹" },
+  { id: 54, name: "Bundesliga", country: "Germany", flag: "🇩🇪" },
+  { id: 53, name: "Ligue 1", country: "France", flag: "🇫🇷" },
+  { id: 61, name: "Liga Portugal", country: "Portugal", flag: "🇵🇹" },
+  { id: 57, name: "Eredivisie", country: "Netherlands", flag: "🇳🇱" },
+  { id: 71, name: "Süper Lig", country: "Turkey", flag: "🇹🇷" },
+  { id: 40, name: "First Division A", country: "Belgium", flag: "🇧🇪" },
+  { id: 64, name: "Premiership", country: "Scotland", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
 ] as const;
 
 export type LeagueId = (typeof LEAGUES)[number]["id"];

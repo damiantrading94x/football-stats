@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getTopScorers, getTopAssists, getStandings } from "@/lib/api";
+import {
+  getTopScorers,
+  getTopAssists,
+  getStandings,
+  enrichWithTeamNames,
+} from "@/lib/fotmob";
 import { LEAGUES } from "@/lib/types";
 
-export const revalidate = 300; // 5 minutes ISR
+export const revalidate = 600; // 10 minutes ISR
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -20,10 +25,19 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const [topScorers, topAssists, standings] = await Promise.all([
+    // Fetch standings first (needed for team name enrichment)
+    const standings = await getStandings(id);
+
+    // Fetch scorers and assists in parallel
+    const [rawScorers, rawAssists] = await Promise.all([
       getTopScorers(id),
       getTopAssists(id),
-      getStandings(id),
+    ]);
+
+    // Enrich with team names from standings
+    const [topScorers, topAssists] = await Promise.all([
+      enrichWithTeamNames(rawScorers, id),
+      enrichWithTeamNames(rawAssists, id),
     ]);
 
     return NextResponse.json(
@@ -41,7 +55,7 @@ export async function GET(request: NextRequest) {
       },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60",
+          "Cache-Control": "public, s-maxage=600, stale-while-revalidate=60",
         },
       }
     );
