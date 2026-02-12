@@ -2,14 +2,14 @@ import { LEAGUES } from "@/lib/types";
 import { LeagueCard } from "@/components/LeagueCard";
 import { Trophy, TrendingUp, Target, Users } from "lucide-react";
 
-const STAT_HIGHLIGHTS = [
-  { icon: Trophy, label: "Leagues", value: "10", color: "text-amber-500" },
-  { icon: TrendingUp, label: "Updated", value: "5min", color: "text-emerald-500" },
-  { icon: Target, label: "Stats", value: "Live", color: "text-blue-500" },
-  { icon: Users, label: "Players", value: "200+", color: "text-purple-500" },
-];
-
 export default function Home() {
+  const STAT_HIGHLIGHTS = [
+    { icon: Trophy, label: "Leagues", value: String(LEAGUES.length), color: "text-amber-500" },
+    { icon: TrendingUp, label: "Updated", value: "5min", color: "text-emerald-500" },
+    { icon: Target, label: "Stats", value: "Live", color: "text-blue-500" },
+    { icon: Users, label: "Players", value: "200+", color: "text-purple-500" },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
       {/* Hero Section */}
