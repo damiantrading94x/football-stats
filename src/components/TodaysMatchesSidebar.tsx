@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { format, parseISO } from "date-fns";
 import { Tv, ChevronRight, ChevronLeft, Loader2, Calendar, Zap } from "lucide-react";
@@ -84,15 +85,36 @@ function BroadcastTooltip({ broadcast }: { broadcast: BroadcastInfo }) {
 
 function MatchRow({ match }: { match: TodaysMatch }) {
   const [showBroadcast, setShowBroadcast] = useState(false);
+  const [popoverPos, setPopoverPos] = useState<{ top: number; left: number } | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout>(undefined);
+  const rowRef = useRef<HTMLDivElement>(null);
   const broadcast = getBroadcastForLeague(match.leagueId);
+
+  const updatePosition = useCallback(() => {
+    if (rowRef.current) {
+      const rect = rowRef.current.getBoundingClientRect();
+      setPopoverPos({
+        top: rect.top,
+        left: rect.left - 232, // 224px width + 8px gap
+      });
+    }
+  }, []);
 
   const handleMouseEnter = () => {
     clearTimeout(timeoutRef.current);
+    updatePosition();
     setShowBroadcast(true);
   };
 
   const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => setShowBroadcast(false), 200);
+  };
+
+  const handlePopoverEnter = () => {
+    clearTimeout(timeoutRef.current);
+  };
+
+  const handlePopoverLeave = () => {
     timeoutRef.current = setTimeout(() => setShowBroadcast(false), 200);
   };
 
@@ -101,6 +123,7 @@ function MatchRow({ match }: { match: TodaysMatch }) {
 
   return (
     <div
+      ref={rowRef}
       className="relative group"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -175,25 +198,28 @@ function MatchRow({ match }: { match: TodaysMatch }) {
         <Tv className="w-3 h-3 shrink-0 text-gray-300 dark:text-gray-600 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors" />
       </div>
 
-      {/* Broadcast Popover */}
-      {showBroadcast && (
-        <div
-          className="absolute right-full top-0 mr-2 z-50 w-56 p-3 rounded-xl
-            bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
-            shadow-xl shadow-black/10 dark:shadow-black/30
-            animate-in fade-in slide-in-from-right-2 duration-150"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-100 dark:border-gray-700">
-            <Tv className="w-3.5 h-3.5 text-blue-500" />
-            <span className="text-[11px] font-bold text-gray-900 dark:text-white uppercase tracking-wider">
-              Broadcast
-            </span>
-          </div>
-          <BroadcastTooltip broadcast={broadcast} />
-        </div>
-      )}
+      {/* Broadcast Popover - rendered via portal to avoid overflow clipping */}
+      {showBroadcast && popoverPos && typeof document !== "undefined" &&
+        createPortal(
+          <div
+            className="fixed z-[9999] w-56 p-3 rounded-xl
+              bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+              shadow-xl shadow-black/10 dark:shadow-black/30"
+            style={{ top: popoverPos.top, left: Math.max(8, popoverPos.left) }}
+            onMouseEnter={handlePopoverEnter}
+            onMouseLeave={handlePopoverLeave}
+          >
+            <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-100 dark:border-gray-700">
+              <Tv className="w-3.5 h-3.5 text-blue-500" />
+              <span className="text-[11px] font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+                Broadcast
+              </span>
+            </div>
+            <BroadcastTooltip broadcast={broadcast} />
+          </div>,
+          document.body
+        )
+      }
     </div>
   );
 }
