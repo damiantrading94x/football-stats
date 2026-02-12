@@ -770,3 +770,105 @@ export async function getPlayerMatchLog(playerId: number): Promise<PlayerProfile
 
   return profile;
 }
+
+// ──────────────────────────────────────────────
+// Today's matches across all leagues
+// ──────────────────────────────────────────────
+
+export interface TodaysMatch {
+  matchId: string;
+  leagueId: number;
+  leagueName: string;
+  homeTeam: { id: number; name: string; shortName: string };
+  awayTeam: { id: number; name: string; shortName: string };
+  utcTime: string;
+  status: "upcoming" | "live" | "finished";
+  score?: string;
+  round: string;
+}
+
+export interface TodaysMatchesByLeague {
+  leagueId: number;
+  leagueName: string;
+  leagueCountry: string;
+  matches: TodaysMatch[];
+}
+
+export async function getTodaysMatches(
+  leagueIds: number[],
+  leagueMeta: Record<number, { name: string; country: string }>
+): Promise<TodaysMatchesByLeague[]> {
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0, 10); // YYYY-MM-DD
+
+  const results: TodaysMatchesByLeague[] = [];
+
+  // Fetch leagues in batches of 6 to avoid overwhelming the API
+  const batchSize = 6;
+  for (let i = 0; i < leagueIds.length; i += batchSize) {
+    const batch = leagueIds.slice(i, i + batchSize);
+    const batchResults = await Promise.all(
+      batch.map(async (leagueId) => {
+        try {
+          const data = await fotmobFetch<
+            FotMobLeagueResponse & { fixtures: { allMatches: FotMobMatch[] } }
+          >(`${FOTMOB_BASE}/leagues?id=${leagueId}`);
+
+          if (!data.fixtures?.allMatches) return null;
+
+          const todaysMatches = data.fixtures.allMatches.filter((m) => {
+            if (m.status.cancelled) return false;
+            const matchDate = m.status.utcTime.slice(0, 10);
+            return matchDate === todayStr;
+          });
+
+          if (todaysMatches.length === 0) return null;
+
+          const meta = leagueMeta[leagueId] || { name: `League ${leagueId}`, country: "" };
+
+          return {
+            leagueId,
+            leagueName: meta.name,
+            leagueCountry: meta.country,
+            matches: todaysMatches.map((m) => ({
+              matchId: m.id,
+              leagueId,
+              leagueName: meta.name,
+              homeTeam: {
+                id: parseInt(m.home.id),
+                name: m.home.name,
+                shortName: m.home.shortName,
+              },
+              awayTeam: {
+                id: parseInt(m.away.id),
+                name: m.away.name,
+                shortName: m.away.shortName,
+              },
+              utcTime: m.status.utcTime,
+              status: m.status.started && !m.status.finished
+                ? "live" as const
+                : m.status.finished
+                ? "finished" as const
+                : "upcoming" as const,
+              score: m.status.scoreStr,
+              round: m.round,
+            })),
+          };
+        } catch (error) {
+          console.error(`Error fetching today's matches for league ${leagueId}:`, error);
+          return null;
+        }
+      })
+    );
+    results.push(...batchResults.filter((r): r is NonNullable<typeof r> => r !== null));
+  }
+
+  // Sort by earliest kick-off
+  results.sort((a, b) => {
+    const aFirst = a.matches[0]?.utcTime || "";
+    const bFirst = b.matches[0]?.utcTime || "";
+    return aFirst.localeCompare(bFirst);
+  });
+
+  return results;
+}
