@@ -2,7 +2,7 @@
 
 import { TopScorer } from "@/lib/types";
 import Image from "next/image";
-import { Target, HandHelping, AlertTriangle, Clock, Star } from "lucide-react";
+import { Target, HandHelping, AlertTriangle, Clock, Star, Timer, Zap } from "lucide-react";
 
 interface StatsTableProps {
   players: TopScorer[];
@@ -161,6 +161,21 @@ export function StatsTable({ players, type }: StatsTableProps) {
                   label="Appearances"
                   color="text-gray-400 dark:text-gray-500"
                 />
+                {p.minutes > 0 && (
+                  <StatBadge
+                    icon={Timer}
+                    value={`${p.minutes}'`}
+                    label="Minutes Played"
+                    color="text-gray-400 dark:text-gray-500"
+                  />
+                )}
+                {type === "scorers" && p.minutes > 0 && p.goals > 0 && (
+                  <div className="flex items-center gap-1 text-xs text-amber-500 dark:text-amber-400" title="Minutes per Goal">
+                    <Zap className="w-3.5 h-3.5" />
+                    <span className="font-semibold">{Math.round(p.minutes / p.goals)}'</span>
+                    <span className="text-[9px] text-gray-400">/goal</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>

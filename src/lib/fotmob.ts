@@ -168,77 +168,91 @@ async function getDeepStats(
 
 export async function getTopScorers(leagueId: number): Promise<TopScorer[]> {
   const seasonId = await getLeagueSeasonId(leagueId);
-  const [goalData, assistData] = await Promise.all([
+  const [goalData, assistData, minsData] = await Promise.all([
     getDeepStats(leagueId, seasonId, "goals"),
     getDeepStats(leagueId, seasonId, "goal_assist"),
+    getDeepStats(leagueId, seasonId, "mins_played"),
   ]);
 
-  // Build assists lookup
+  // Build lookups
   const assistMap = new Map(assistData.map((p) => [p.id, p.statValue.value]));
+  const minsMap = new Map(
+    minsData.map((p) => [p.id, { minutes: p.statValue.value, appearances: p.substatValue?.value || 0 }])
+  );
 
-  return goalData.slice(0, 25).map((p, idx) => ({
-    rank: idx + 1,
-    player: {
-      id: p.id,
-      name: p.name,
-      firstname: p.name.split(" ")[0] || "",
-      lastname: p.name.split(" ").slice(1).join(" ") || "",
-      age: 0,
-      nationality: "",
-      photo: playerPhotoUrl(p.id),
-    },
-    team: {
-      id: p.teamId,
-      name: "", // Will be enriched from standings
-      logo: teamLogoUrl(p.teamId),
-    },
-    goals: p.statValue.value,
-    assists: assistMap.get(p.id) || 0,
-    penalties: p.substatValue?.value || 0,
-    penaltyMissed: 0,
-    appearances: 0,
-    minutes: 0,
-    rating: null,
-    yellowCards: 0,
-    redCards: 0,
-  }));
+  return goalData.slice(0, 25).map((p, idx) => {
+    const mins = minsMap.get(p.id);
+    return {
+      rank: idx + 1,
+      player: {
+        id: p.id,
+        name: p.name,
+        firstname: p.name.split(" ")[0] || "",
+        lastname: p.name.split(" ").slice(1).join(" ") || "",
+        age: 0,
+        nationality: "",
+        photo: playerPhotoUrl(p.id),
+      },
+      team: {
+        id: p.teamId,
+        name: "", // Will be enriched from standings
+        logo: teamLogoUrl(p.teamId),
+      },
+      goals: p.statValue.value,
+      assists: assistMap.get(p.id) || 0,
+      penalties: p.substatValue?.value || 0,
+      penaltyMissed: 0,
+      appearances: mins?.appearances || 0,
+      minutes: mins?.minutes || 0,
+      rating: null,
+      yellowCards: 0,
+      redCards: 0,
+    };
+  });
 }
 
 export async function getTopAssists(leagueId: number): Promise<TopScorer[]> {
   const seasonId = await getLeagueSeasonId(leagueId);
-  const [assistData, goalData] = await Promise.all([
+  const [assistData, goalData, minsData] = await Promise.all([
     getDeepStats(leagueId, seasonId, "goal_assist"),
     getDeepStats(leagueId, seasonId, "goals"),
+    getDeepStats(leagueId, seasonId, "mins_played"),
   ]);
 
   const goalMap = new Map(goalData.map((p) => [p.id, p.statValue.value]));
+  const minsMap = new Map(
+    minsData.map((p) => [p.id, { minutes: p.statValue.value, appearances: p.substatValue?.value || 0 }])
+  );
 
-  return assistData.slice(0, 25).map((p, idx) => ({
-    rank: idx + 1,
-    player: {
-      id: p.id,
-      name: p.name,
-      firstname: p.name.split(" ")[0] || "",
-      lastname: p.name.split(" ").slice(1).join(" ") || "",
-      age: 0,
-      nationality: "",
-      photo: playerPhotoUrl(p.id),
-    },
-    team: {
-      id: p.teamId,
-      name: "",
-      logo: teamLogoUrl(p.teamId),
-    },
-    goals: goalMap.get(p.id) || 0,
-    assists: p.statValue.value,
-    penalties: 0,
-    penaltyMissed: 0,
-    appearances: 0,
-    minutes: 0,
-    rating: null,
-    yellowCards: 0,
-    redCards: 0,
-  }));
+  return assistData.slice(0, 25).map((p, idx) => {
+    const mins = minsMap.get(p.id);
+    return {
+      rank: idx + 1,
+      player: {
+        id: p.id,
+        name: p.name,
+        firstname: p.name.split(" ")[0] || "",
+        lastname: p.name.split(" ").slice(1).join(" ") || "",
+        age: 0,
+        nationality: "",
+        photo: playerPhotoUrl(p.id),
+      },
+      team: {
+        id: p.teamId,
+        name: "",
+        logo: teamLogoUrl(p.teamId),
+      },
+      goals: goalMap.get(p.id) || 0,
+      assists: p.statValue.value,
+      penalties: 0,
+      penaltyMissed: 0,
+      appearances: mins?.appearances || 0,
+      minutes: mins?.minutes || 0,
+      rating: null,
+      yellowCards: 0,
+      redCards: 0,
+    };
+  });
 }
 
 export async function getStandings(leagueId: number): Promise<Standing[]> {
