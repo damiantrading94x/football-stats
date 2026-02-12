@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronRight } from "lucide-react";
+import { leagueLogoUrl } from "@/lib/types";
 
 interface LeagueCardProps {
   id: number;
@@ -46,7 +48,15 @@ export function LeagueCard({ id, name, country, flag, index }: LeagueCardProps) 
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <span className="text-3xl">{flag}</span>
+            <div className="relative w-10 h-10 flex-shrink-0">
+              <Image
+                src={leagueLogoUrl(id)}
+                alt={name}
+                fill
+                className="object-contain"
+                sizes="40px"
+              />
+            </div>
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">
                 {name}

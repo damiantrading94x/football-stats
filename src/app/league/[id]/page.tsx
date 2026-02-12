@@ -1,20 +1,23 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import { LEAGUES, TopScorer, Standing } from "@/lib/types";
+import { LEAGUES, TopScorer, Standing, leagueLogoUrl } from "@/lib/types";
 import { StatsTable } from "@/components/StatsTable";
 import { StandingsTable } from "@/components/StandingsTable";
 import { PenaltyLeaders } from "@/components/PenaltyLeaders";
+import { FixturesList, Fixture } from "@/components/FixturesList";
 import {
   ArrowLeft,
   Trophy,
   HandHelping,
   Target,
   TableProperties,
+  Calendar,
   RefreshCw,
   Clock,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 
 interface LeagueResponse {
@@ -27,16 +30,18 @@ interface LeagueResponse {
   topScorers: TopScorer[];
   topAssists: TopScorer[];
   standings: Standing[];
+  fixtures: Fixture[];
   lastUpdated: string;
 }
 
-type TabType = "scorers" | "assists" | "penalties" | "standings";
+type TabType = "scorers" | "assists" | "penalties" | "standings" | "fixtures";
 
 const TABS: { key: TabType; label: string; icon: React.ElementType }[] = [
   { key: "scorers", label: "Top Scorers", icon: Trophy },
   { key: "assists", label: "Top Assists", icon: HandHelping },
   { key: "penalties", label: "Penalties", icon: Target },
   { key: "standings", label: "Standings", icon: TableProperties },
+  { key: "fixtures", label: "Fixtures", icon: Calendar },
 ];
 
 function LoadingSkeleton() {
@@ -123,7 +128,15 @@ export default function LeaguePage({
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <span className="text-4xl">{league.flag}</span>
+            <div className="relative w-12 h-12 flex-shrink-0">
+              <Image
+                src={leagueLogoUrl(leagueId)}
+                alt={league.name}
+                fill
+                className="object-contain"
+                sizes="48px"
+              />
+            </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
                 {league.name}
@@ -181,6 +194,8 @@ export default function LeaguePage({
                 ? "Assists"
                 : tab.key === "penalties"
                 ? "Pens"
+                : tab.key === "fixtures"
+                ? "Matches"
                 : "Table"}
             </span>
           </button>
@@ -260,6 +275,20 @@ export default function LeaguePage({
               <div className="rounded-xl border border-gray-100 dark:border-white/5 bg-white dark:bg-white/[0.02] p-4">
                 <StandingsTable standings={data?.standings || []} />
               </div>
+            </div>
+          )}
+
+          {activeTab === "fixtures" && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm uppercase tracking-widest text-gray-400 dark:text-gray-500 font-semibold">
+                  Upcoming Matches
+                </h2>
+                <span className="text-xs text-gray-400 dark:text-gray-500">
+                  {data?.fixtures?.length || 0} matches
+                </span>
+              </div>
+              <FixturesList fixtures={data?.fixtures || []} />
             </div>
           )}
         </div>

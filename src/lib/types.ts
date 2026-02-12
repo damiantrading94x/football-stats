@@ -89,7 +89,16 @@ export interface LeagueData {
   standings: Standing[];
 }
 
+export function leagueLogoUrl(leagueId: number): string {
+  return `https://images.fotmob.com/image_resources/logo/leaguelogo/dark/${leagueId}.png`;
+}
+
 export const LEAGUES = [
+  // European Cups
+  { id: 42, name: "Champions League", country: "Europe", flag: "🏆" },
+  { id: 73, name: "Europa League", country: "Europe", flag: "🏆" },
+  { id: 10216, name: "Conference League", country: "Europe", flag: "🏆" },
+  // Top European Leagues
   { id: 47, name: "Premier League", country: "England", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
   { id: 87, name: "LaLiga", country: "Spain", flag: "🇪🇸" },
   { id: 55, name: "Serie A", country: "Italy", flag: "🇮🇹" },
@@ -100,6 +109,14 @@ export const LEAGUES = [
   { id: 71, name: "Süper Lig", country: "Turkey", flag: "🇹🇷" },
   { id: 40, name: "First Division A", country: "Belgium", flag: "🇧🇪" },
   { id: 64, name: "Premiership", country: "Scotland", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
+  // Middle East
+  { id: 536, name: "Saudi Pro League", country: "Saudi Arabia", flag: "🇸🇦" },
+  // South America
+  { id: 268, name: "Serie A", country: "Brazil", flag: "🇧🇷" },
+  { id: 112, name: "Liga Profesional", country: "Argentina", flag: "🇦🇷" },
+  // Poland
+  { id: 196, name: "Ekstraklasa", country: "Poland", flag: "🇵🇱" },
+  { id: 197, name: "1. Liga", country: "Poland", flag: "🇵🇱" },
 ] as const;
 
 export type LeagueId = (typeof LEAGUES)[number]["id"];

@@ -60,19 +60,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Info */}
-      <div className="mt-12 rounded-2xl border border-gray-100 dark:border-white/5 bg-white dark:bg-white/[0.02] p-6">
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-          About this app
-        </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-          FootballStats provides live rankings using data from API-Football.
-          Stats are refreshed every 5 minutes to ensure you get the latest
-          information right after matches end. We track goals, assists, penalty
-          records, player ratings, and full league standings for the top 10
-          football leagues worldwide.
-        </p>
-      </div>
     </div>
   );
 }

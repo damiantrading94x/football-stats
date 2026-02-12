@@ -4,6 +4,7 @@ import {
   getTopAssists,
   getStandings,
   enrichWithTeamNames,
+  getUpcomingFixtures,
 } from "@/lib/fotmob";
 import { LEAGUES } from "@/lib/types";
 
@@ -28,10 +29,11 @@ export async function GET(request: NextRequest) {
     // Fetch standings first (needed for team name enrichment)
     const standings = await getStandings(id);
 
-    // Fetch scorers and assists in parallel
-    const [rawScorers, rawAssists] = await Promise.all([
+    // Fetch scorers, assists and fixtures in parallel
+    const [rawScorers, rawAssists, fixtures] = await Promise.all([
       getTopScorers(id),
       getTopAssists(id),
+      getUpcomingFixtures(id),
     ]);
 
     // Enrich with team names from standings
@@ -51,6 +53,7 @@ export async function GET(request: NextRequest) {
         topScorers,
         topAssists,
         standings,
+        fixtures,
         lastUpdated: new Date().toISOString(),
       },
       {

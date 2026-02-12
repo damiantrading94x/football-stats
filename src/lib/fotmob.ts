@@ -1,4 +1,5 @@
 import { TopScorer, Standing } from "./types";
+import { Fixture } from "@/components/FixturesList";
 
 const FOTMOB_BASE = "https://www.fotmob.com/api";
 const HEADERS = {
@@ -268,5 +269,69 @@ export async function enrichWithTeamNames(
       ...p.team,
       name: teamNameMap.get(p.team.id) || `Team ${p.team.id}`,
     },
+  }));
+}
+
+// ──────────────────────────────────────────────
+// Upcoming fixtures
+// ──────────────────────────────────────────────
+
+interface FotMobMatch {
+  id: string;
+  round: string;
+  roundName: number;
+  home: { id: string; name: string; shortName: string };
+  away: { id: string; name: string; shortName: string };
+  status: {
+    utcTime: string;
+    started: boolean;
+    cancelled: boolean;
+    finished: boolean;
+    scoreStr?: string;
+    reason?: { short: string };
+  };
+}
+
+export async function getUpcomingFixtures(
+  leagueId: number,
+  limit = 30
+): Promise<Fixture[]> {
+  const data = await fotmobFetch<FotMobLeagueResponse & { fixtures: { allMatches: FotMobMatch[] } }>(
+    `${FOTMOB_BASE}/leagues?id=${leagueId}`
+  );
+
+  if (!data.fixtures?.allMatches) return [];
+
+  const now = new Date();
+  const upcoming = data.fixtures.allMatches
+    .filter((m) => {
+      if (m.status.cancelled) return false;
+      // Include not-started and currently live matches
+      if (!m.status.finished) return true;
+      return false;
+    })
+    .sort((a, b) => new Date(a.status.utcTime).getTime() - new Date(b.status.utcTime).getTime())
+    .slice(0, limit);
+
+  return upcoming.map((m) => ({
+    id: m.id,
+    round: m.round,
+    homeTeam: {
+      id: parseInt(m.home.id),
+      name: m.home.name,
+      shortName: m.home.shortName,
+    },
+    awayTeam: {
+      id: parseInt(m.away.id),
+      name: m.away.name,
+      shortName: m.away.shortName,
+    },
+    utcTime: m.status.utcTime,
+    status: m.status.started && !m.status.finished
+      ? "live"
+      : m.status.finished
+      ? "finished"
+      : "upcoming",
+    score: m.status.scoreStr,
   }));
 }
