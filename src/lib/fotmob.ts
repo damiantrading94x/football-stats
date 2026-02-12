@@ -289,6 +289,80 @@ export async function enrichWithTeamNames(
 }
 
 // ──────────────────────────────────────────────
+// Penalty data from player shotmaps
+// ──────────────────────────────────────────────
+
+interface FotMobShot {
+  eventType: string;
+  situation: string;
+}
+
+interface FotMobPlayerDataResponse {
+  firstSeasonStats?: {
+    shotmap?: FotMobShot[];
+  };
+  statSeasons?: Array<{
+    tournaments: Array<{ tournamentId: number; entryId: string }>;
+  }>;
+}
+
+export async function enrichWithPenaltyData(
+  players: TopScorer[],
+  leagueId: number
+): Promise<TopScorer[]> {
+  // Only fetch shotmap for players who have scored penalties
+  const penaltyPlayers = players.filter((p) => p.penalties > 0);
+  if (penaltyPlayers.length === 0) return players;
+
+  // Find the correct season entry for this league from the first player
+  const penaltyData = await Promise.all(
+    penaltyPlayers.map(async (p) => {
+      try {
+        // First get the player data to find the right season entry for this league
+        const playerData = await fotmobFetch<FotMobPlayerDataResponse>(
+          `${FOTMOB_BASE}/playerData?id=${p.player.id}`
+        );
+
+        // Find the tournament entry matching this league
+        let seasonEntry = "0-0"; // default to current season, first tournament
+        if (playerData.statSeasons?.[0]?.tournaments) {
+          const tournIdx = playerData.statSeasons[0].tournaments.findIndex(
+            (t) => t.tournamentId === leagueId
+          );
+          if (tournIdx >= 0) {
+            seasonEntry = playerData.statSeasons[0].tournaments[tournIdx].entryId;
+          }
+        }
+
+        // Fetch with the correct season entry
+        const data = await fotmobFetch<FotMobPlayerDataResponse>(
+          `${FOTMOB_BASE}/playerData?id=${p.player.id}&season=${seasonEntry}`
+        );
+
+        const shots = data.firstSeasonStats?.shotmap || [];
+        const pens = shots.filter((s) => s.situation === "Penalty");
+        const scored = pens.filter((s) => s.eventType === "Goal").length;
+        const missed = pens.length - scored;
+
+        return { playerId: p.player.id, scored, missed };
+      } catch {
+        return { playerId: p.player.id, scored: p.penalties, missed: 0 };
+      }
+    })
+  );
+
+  const penaltyMap = new Map(penaltyData.map((pd) => [pd.playerId, pd]));
+
+  return players.map((p) => {
+    const pd = penaltyMap.get(p.player.id);
+    if (pd) {
+      return { ...p, penalties: pd.scored, penaltyMissed: pd.missed };
+    }
+    return p;
+  });
+}
+
+// ──────────────────────────────────────────────
 // Upcoming fixtures
 // ──────────────────────────────────────────────
 

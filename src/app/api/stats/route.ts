@@ -4,6 +4,7 @@ import {
   getTopAssists,
   getStandings,
   enrichWithTeamNames,
+  enrichWithPenaltyData,
   getUpcomingFixtures,
 } from "@/lib/fotmob";
 import { LEAGUES } from "@/lib/types";
@@ -37,10 +38,13 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Enrich with team names from standings
-    const [topScorers, topAssists] = await Promise.all([
+    const [scorersWithNames, topAssists] = await Promise.all([
       enrichWithTeamNames(rawScorers, id),
       enrichWithTeamNames(rawAssists, id),
     ]);
+
+    // Enrich with actual penalty data from player shotmaps
+    const topScorers = await enrichWithPenaltyData(scorersWithNames, id);
 
     return NextResponse.json(
       {
